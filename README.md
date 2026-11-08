@@ -73,6 +73,8 @@ npx vitest run src/domain/prize-engine/engine.test.ts   # 單一測試檔
 
 ## 部署
 
+本專案已附 GitHub Actions 流程（`.github/workflows/deploy.yml`）：push 到 `master`／`main` 時會自動執行 lint、typecheck、測試與 build，並發佈到 GitHub Pages。首次使用請到 repo 的 **Settings → Pages → Build and deployment → Source** 選擇 **GitHub Actions**。網址為 `https://<帳號>.github.io/<repo 名稱>/`。
+
 `vite.config.ts` 使用 `base: './'`，且為單頁、無前端路由，產出的 `dist/` 可直接放到任何靜態主機：
 
 - **Cloudflare Pages / Vercel / Netlify**：Build command `npm run build`，Output directory `dist`。

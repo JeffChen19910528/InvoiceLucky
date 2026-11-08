@@ -73,6 +73,8 @@ npx vitest run src/domain/prize-engine/engine.test.ts   # a single test file
 
 ## Deployment
 
+A GitHub Actions workflow (`.github/workflows/deploy.yml`) is included: every push to `master` / `main` runs lint, typecheck, tests and the build, then publishes to GitHub Pages. On first use, go to the repo's **Settings → Pages → Build and deployment → Source** and choose **GitHub Actions**. The site is served at `https://<user>.github.io/<repo>/`.
+
 `vite.config.ts` uses `base: './'` and the app is a single page with no client-side routing, so the generated `dist/` can be served from any static host:
 
 - **Cloudflare Pages / Vercel / Netlify**: build command `npm run build`, output directory `dist`.
