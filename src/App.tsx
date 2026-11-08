@@ -40,6 +40,10 @@ export default function App() {
   const warning = useAppStore((s) => s.warning)
   const dismiss = useAppStore((s) => s.dismissWarning)
   const online = useOnline()
+  const syncPublished = useAppStore((s) => s.syncPublished)
+  useEffect(() => {
+    void syncPublished()
+  }, [syncPublished])
 
   const navButton = (n: (typeof NAV)[number], vertical: boolean) => {
     const Icon = n.icon

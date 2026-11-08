@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { msg, type Msg } from '../domain/models/message'
 import type { Invoice, PrizePeriod } from '../domain/models/types'
 import { SEED_PERIODS } from '../services/prize-data/seed'
+import { fetchPublishedPeriods } from '../services/prize-data/published'
 import { loadState, saveState, clearState } from '../services/storage/storage'
 import { invoiceKey, planAdd } from '../services/import-export/invoices'
 import type { ImportPreview } from '../services/import-export/backup'
@@ -12,9 +13,14 @@ export interface AddOutcome {
   duplicates: Invoice[]
 }
 
+export type SyncStatus = { state: 'idle' | 'loading' | 'ok' | 'error'; generatedAt?: string }
+
 interface AppState {
   invoices: Invoice[]
   userPeriods: PrizePeriod[]
+  /** 由排程同步、隨網站部署的官方獎號（非使用者資料，不寫入 localStorage）。 */
+  publishedPeriods: PrizePeriod[]
+  syncStatus: SyncStatus
   selectedPeriod: string
   warning: Msg | null
   addInvoices: (list: Invoice[]) => AddOutcome
@@ -26,12 +32,14 @@ interface AppState {
   commitImport: (preview: ImportPreview) => void
   clearAll: () => void
   dismissWarning: () => void
+  syncPublished: (fetchFn?: typeof fetch) => Promise<void>
 }
 
-/** 使用者資料優先於內建快照；其餘使用內建官方快照。 */
-export function mergePeriods(userPeriods: PrizePeriod[]): PrizePeriod[] {
+/** 優先序：使用者匯入 > 自動同步的官方資料 > 內建快照。 */
+export function mergePeriods(userPeriods: PrizePeriod[], publishedPeriods: PrizePeriod[] = []): PrizePeriod[] {
   const map = new Map<string, PrizePeriod>()
   for (const p of SEED_PERIODS) map.set(p.id, p)
+  for (const p of publishedPeriods) map.set(p.id, p)
   for (const p of userPeriods) map.set(p.id, p)
   return [...map.values()].sort((a, b) => (a.id < b.id ? 1 : -1))
 }
@@ -53,6 +61,8 @@ export const useAppStore = create<AppState>((set, get) => {
     userPeriods: loaded.state.userPeriods,
     selectedPeriod: latestPeriodWithData(mergePeriods(loaded.state.userPeriods)) ?? '',
     warning: loaded.warning ?? null,
+    publishedPeriods: [],
+    syncStatus: { state: 'idle' },
 
     addInvoices(list) {
       const { toAdd, duplicates } = planAdd(get().invoices, list)
@@ -94,5 +104,24 @@ export const useAppStore = create<AppState>((set, get) => {
       set({ invoices: [], userPeriods: [] })
     },
     dismissWarning: () => set({ warning: null }),
+    async syncPublished(fetchFn) {
+      set({ syncStatus: { state: 'loading' } })
+      try {
+        const data = await fetchPublishedPeriods(fetchFn)
+        const user = get().userPeriods
+        const prevLatest = latestPeriodWithData(mergePeriods(user, get().publishedPeriods))
+        const nextLatest = latestPeriodWithData(mergePeriods(user, data.periods))
+        // 使用者還停在原本的最新期別時，自動跟到新開獎的那一期；手動選過別期則不動。
+        const follow = get().selectedPeriod === (prevLatest ?? '') && nextLatest
+        set({
+          publishedPeriods: data.periods,
+          syncStatus: { state: 'ok', generatedAt: data.generatedAt },
+          ...(follow ? { selectedPeriod: nextLatest } : {}),
+        })
+      } catch {
+        // 離線或檔案不可用：維持內建快照，並讓設定頁明示同步失敗（不靜默回退）。
+        set({ syncStatus: { state: 'error' } })
+      }
+    },
   }
 })

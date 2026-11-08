@@ -3,16 +3,19 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [master, main]
+  # 每天自動同步官方獎號並重新部署（台灣時間 10:17）。每兩個月 25 日開獎，毋須手動匯入。
+  schedule:
+    - cron: '17 2 * * *'
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -24,6 +27,25 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+
+      # 在伺服器端抓取官方「中獎號碼單」（瀏覽器因 CORS 無法直接讀取）。
+      # 失敗只顯示警告並沿用既有資料，不會阻擋部署，也不會寫入猜測的資料。
+      - name: Sync official prize numbers
+        continue-on-error: true
+        run: npm run prizes:update
+
+      - name: Commit updated prize data
+        run: |
+          if [ -n "$(git status --porcelain -- public/data/prize-periods.json)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add public/data/prize-periods.json
+            git commit -m "chore: 同步官方獎號"
+            git push
+          else
+            echo "No prize data changes"
+          fi
+
       - run: npm run lint
       - run: npm run typecheck
       - run: npm test

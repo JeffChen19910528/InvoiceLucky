@@ -91,7 +91,7 @@ npx vitest run src/domain/prize-engine/engine.test.ts   # 單一測試檔
 
 ## 部署
 
-本專案已附 GitHub Actions 流程（`.github/workflows/deploy.yml`）：push 到 `master`／`main` 時會自動執行 lint、typecheck、測試與 build，並發佈到 GitHub Pages。首次使用請到 repo 的 **Settings → Pages → Build and deployment → Source** 選擇 **GitHub Actions**。網址為 `https://<帳號>.github.io/<repo 名稱>/`。
+本專案已附 GitHub Actions 流程（`.github/workflows/deploy.yml`）：push 到 `master`／`main`、手動觸發，以及**每天排程**時，會先同步官方獎號，再執行 lint、typecheck、測試與 build，並發佈到 GitHub Pages。首次使用請到 repo 的 **Settings → Pages → Build and deployment → Source** 選擇 **GitHub Actions**。網址為 `https://<帳號>.github.io/<repo 名稱>/`。
 
 `vite.config.ts` 使用 `base: './'`，且為單頁、無前端路由，產出的 `dist/` 可直接放到任何靜態主機：
 
@@ -117,11 +117,20 @@ npx vitest run src/domain/prize-engine/engine.test.ts   # 單一測試檔
 
 **實測結果（2026-11-08）**：
 
-- 上述頁面可正常取得（HTTP 200，靜態 HTML），但回應**沒有 `Access-Control-Allow-Origin`**，瀏覽器端的跨網域請求會被擋下，因此網站**無法自動同步**。本專案不使用任何第三方 CORS proxy 或來源不明的 API，也未假設電子發票開放資料 API 含有中獎號碼。
-- 內建 115 年 05-06 月、07-08 月兩期為當日直接讀取官方頁面的**靜態快照**（標示「官方來源（內建快照）」及取得時間），不是即時同步。
+- 官方頁面可正常取得（HTTP 200，靜態 HTML），但回應**沒有 `Access-Control-Allow-Origin`**，**瀏覽器無法直接讀取**。本專案不使用任何第三方 CORS proxy 或來源不明的 API。
+- 電子發票整合服務平台的開放資料 API（`openapi.json`，28 個端點）只提供**統計資料**（開立／捐贈數量、中獎與領獎統計等），**不含中獎號碼**，且其 API 網域對網站來源的瀏覽器請求回 403（無 CORS 標頭），因此不能用來更新兌獎號碼。
+- 解法：由**伺服器端排程**取得官方頁面（見下），網頁只讀取自己網站上的 JSON。
 - 雲端專屬獎號碼僅以 PDF 清單公布（五百元、八百元、兩千元、百萬元），無可機器讀取的資料，故**不內建**。
 
-**新期別的更新方式**（設定頁 →「獎號資料」）：
+**自動同步（預設）**：
+
+- `.github/workflows/deploy.yml` 每天（台灣時間 10:17）執行 `npm run prizes:update`（`scripts/update-prizes.ts`）：抓取官方「中獎號碼單」（最新一期與前一期兩個頁面），用與網頁相同的 parser 解析，與既有的 `public/data/prize-periods.json` 合併（歷史期別會累積）。有變動才提交，隨後自動重新部署。
+- 網頁啟動時載入自己網站上的 `data/prize-periods.json`（同源、無 CORS），驗證後與內建快照、使用者匯入合併；優先序為 **使用者匯入 > 自動同步 > 內建快照**。新期別出現時，若您停在原本的最新期，會自動跟到新期。
+- 同步或解析失敗時，只在 workflow 顯示警告並沿用既有資料（不會寫入猜測的內容、也不阻擋部署）；網頁載入不到該檔時，設定頁會明確提示，仍可使用內建與手動匯入的資料。
+- 本機也可執行 `npm run prizes:update` 手動同步。
+- 注意：GitHub 對 60 天沒有 repo 活動的排程 workflow 會自動停用；若發現沒有更新，請到 Actions 分頁重新啟用，或手動觸發一次。
+
+**手動更新方式**（排程尚未更新、或想提早取得時；設定頁 →「獎號資料」）：
 
 1. 貼上官方頁面 HTML：在官方「中獎號碼單」頁按右鍵檢視原始碼、全選複製、貼上並解析。parser 會檢查期別、各獎號為 8 位數字、領獎期間；結構變更時會明確報錯，不會回退到舊資料。
 2. 匯入 JSON：格式見設定頁的「下載範例格式」，範例號碼只是格式示意。可用 `tiers` 覆寫獎項規則、用 `cloudPrizes` 提供雲端專屬獎資料。
@@ -135,7 +144,7 @@ npx vitest run src/domain/prize-engine/engine.test.ts   # 單一測試檔
 
 ## 已知限制與後續方向
 
-- 無法自動同步官方獎號（見上）；新期別需手動匯入。
+- 自動同步依賴官方頁面結構；若官方改版導致解析失敗，會顯示警告並需要手動匯入，直到 parser 更新。排程每天執行，資料最多有約一天的延遲。
 - 不判斷領獎資格（買受人身分、是否載明金額、雲端發票是否於開獎前列印等），也不計算所得稅／印花稅。
 - 未提供開獎日期（官方頁面未載明，不推測）。
-- 後續可考慮：PWA 離線安裝、相機掃描發票 QR Code、雲端專屬獎 PDF 解析匯入。
+- 後續可考慮：PWA 離線安裝、雲端專屬獎 PDF 解析匯入。

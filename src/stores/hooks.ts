@@ -6,7 +6,8 @@ import type { Invoice, MatchResult, PrizePeriod } from '../domain/models/types'
 
 export function usePeriods(): PrizePeriod[] {
   const userPeriods = useAppStore((s) => s.userPeriods)
-  return useMemo(() => mergePeriods(userPeriods), [userPeriods])
+  const published = useAppStore((s) => s.publishedPeriods)
+  return useMemo(() => mergePeriods(userPeriods, published), [userPeriods, published])
 }
 
 export function useResults(): { periods: PrizePeriod[]; results: Map<string, MatchResult>; invoices: Invoice[] } {

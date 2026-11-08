@@ -24,6 +24,7 @@ export function PrizeDataSection() {
   const periods = usePeriods()
   const savePeriods = useAppStore((s) => s.savePeriods)
   const removeUserPeriod = useAppStore((s) => s.removeUserPeriod)
+  const sync = useAppStore((s) => s.syncStatus)
   const [tab, setTab] = useState<TabId>('html')
   const [text, setText] = useState('')
   const [msg, setMsg] = useState<{ tone: 'info' | 'error'; text: string } | null>(null)
@@ -49,6 +50,8 @@ export function PrizeDataSection() {
   return (
     <section className="card space-y-3">
       <h2 className="font-semibold">{t('prize.title')}</h2>
+      {sync.state === 'ok' && sync.generatedAt && <p className="text-xs text-emerald-700">{t('prize.syncOk', { time: f.dateTime(sync.generatedAt) })}</p>}
+      {sync.state === 'error' && <Notice tone="warn">{t('prize.syncFailed')}</Notice>}
       <Notice>
         {t('prize.cors')}
         {OFFICIAL_LINKS.map((l) => (

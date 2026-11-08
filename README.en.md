@@ -91,7 +91,7 @@ npx vitest run src/domain/prize-engine/engine.test.ts   # a single test file
 
 ## Deployment
 
-A GitHub Actions workflow (`.github/workflows/deploy.yml`) is included: every push to `master` / `main` runs lint, typecheck, tests and the build, then publishes to GitHub Pages. On first use, go to the repo's **Settings → Pages → Build and deployment → Source** and choose **GitHub Actions**. The site is served at `https://<user>.github.io/<repo>/`.
+A GitHub Actions workflow (`.github/workflows/deploy.yml`) is included: on every push to `master` / `main`, on manual dispatch and **on a daily schedule** it first syncs the official prize numbers, then runs lint, typecheck, tests and the build, and publishes to GitHub Pages. On first use, go to the repo's **Settings → Pages → Build and deployment → Source** and choose **GitHub Actions**. The site is served at `https://<user>.github.io/<repo>/`.
 
 `vite.config.ts` uses `base: './'` and the app is a single page with no client-side routing, so the generated `dist/` can be served from any static host:
 
@@ -117,11 +117,20 @@ Official sources:
 
 **Tested findings (2026-11-08)**:
 
-- These pages load normally (HTTP 200, static HTML) but the responses carry **no `Access-Control-Allow-Origin` header**, so browsers block cross-origin requests and the site **cannot sync automatically**. This project does not use any third-party CORS proxy or unverified API, and does not assume the e-invoice open-data API contains winning numbers.
-- The bundled ROC 115 months 05-06 and 07-08 periods are **static snapshots** read directly from the official pages on that day (labelled "Official (bundled snapshot)" with the fetch time), not a live sync.
+- The official pages load normally (HTTP 200, static HTML) but carry **no `Access-Control-Allow-Origin` header**, so **browsers cannot read them directly**. This project does not use any third-party CORS proxy or unverified API.
+- The E-Invoice Platform open-data API (`openapi.json`, 28 endpoints) only offers **statistics** (issuance / donation counts, prize and redemption statistics, etc.) and **no winning numbers**; its API domain also answers browser requests from a website origin with 403 (no CORS headers), so it cannot be used to update the prize numbers.
+- The solution is a **server-side schedule** that fetches the official page (below); the web app only reads a JSON file from its own site.
 - Cloud-invoice exclusive prize numbers are published only as PDF lists (NT$500 / 800 / 2,000 / 1,000,000) with no machine-readable data, so they are **not bundled**.
 
-**Updating for a new period** (Settings → "Winning-number data"):
+**Automatic sync (default)**:
+
+- `.github/workflows/deploy.yml` runs `npm run prizes:update` (`scripts/update-prizes.ts`) daily (10:17 Taiwan time): it fetches the official winning-numbers pages (latest period and the previous one), parses them with the same parser the app uses, and merges them into the existing `public/data/prize-periods.json` (older periods accumulate). It commits only when something changed and then redeploys automatically.
+- On startup the app loads `data/prize-periods.json` from its own site (same origin, no CORS), validates it and merges it with the bundled snapshot and user imports; priority is **user import > auto-sync > bundled snapshot**. When a new period appears and you were on the previous latest one, the app follows to the new period.
+- If syncing or parsing fails, the workflow only shows a warning and keeps the existing data (nothing guessed is written, and deployment is not blocked); if the page cannot load the file, Settings says so clearly and the bundled and manually imported data stay usable.
+- You can also run `npm run prizes:update` locally.
+- Note: GitHub disables scheduled workflows in repositories with no activity for 60 days; if updates stop, re-enable the workflow in the Actions tab or trigger it manually once.
+
+**Manual update** (when the schedule has not caught up yet, or you want it sooner; Settings → "Winning-number data"):
 
 1. Paste the official page HTML: on the official winning-numbers page, right-click to view the page source, select all, copy, paste and parse. The parser checks the period, that each prize number is 8 digits, and the claim window; if the structure changes it fails with a clear error and never falls back to old data.
 2. Import JSON: see "Download example format" in Settings (the example numbers only illustrate the format). `tiers` can override the prize rules and `cloudPrizes` can supply cloud-exclusive prize data.
@@ -135,7 +144,7 @@ Cloud-exclusive prizes use a separate data model (`PrizePeriod.cloudPrizes`). Th
 
 ## Known limitations and future directions
 
-- Official numbers cannot be synced automatically (see above); new periods must be imported manually.
+- Auto-sync depends on the official page structure; if it is redesigned and parsing fails, a warning is shown and numbers must be imported manually until the parser is updated. The schedule runs daily, so data can lag by about a day.
 - Claim eligibility (buyer identity, whether an amount is stated, whether a cloud invoice was printed before the draw, etc.) is not evaluated, and income / stamp tax is not calculated.
 - Draw dates are not provided (the official page does not state them, and none are guessed).
-- Possible next steps: installable offline PWA, camera scanning of invoice QR codes, importing cloud-exclusive prize PDFs.
+- Possible next steps: installable offline PWA, importing cloud-exclusive prize PDFs.

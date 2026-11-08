@@ -15,7 +15,7 @@ describe('App', () => {
     render(<App />)
     expect(screen.getByRole('heading', { name: '總覽' })).toBeInTheDocument()
     expect(screen.getByTestId('stat-total')).toHaveTextContent('0 張')
-    expect(screen.getAllByText('官方來源（內建快照）').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('官方來源（網站快照）').length).toBeGreaterThan(0)
   })
 
   it('新增發票後在發票頁顯示中獎結果，錯誤格式顯示提示', async () => {
@@ -42,7 +42,7 @@ describe('App', () => {
     expect(screen.getByRole('heading', { name: 'Overview' })).toBeInTheDocument()
     expect(within(nav()).getByRole('button', { name: 'Invoices' })).toBeInTheDocument()
     expect(screen.getByTestId('stat-total')).toHaveTextContent('0')
-    expect(screen.getAllByText('Official (bundled snapshot)').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Official (site snapshot)').length).toBeGreaterThan(0)
     expect(document.documentElement.lang).toBe('en')
     expect(localStorage.getItem('invoice-lucky:lang')).toBe('en')
 
