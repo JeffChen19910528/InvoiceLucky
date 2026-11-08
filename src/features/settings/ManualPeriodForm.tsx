@@ -48,7 +48,7 @@ export function ManualPeriodForm({ onSave }: { onSave: (p: PrizePeriod) => void 
 
   return (
     <form onSubmit={submit} className="space-y-3" noValidate>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 gap-3 min-[400px]:grid-cols-2">
         <Field label={t('manual.year')}>
           <input className="input" inputMode="numeric" value={year} onChange={(e) => setYear(e.target.value)} />
         </Field>
@@ -69,7 +69,7 @@ export function ManualPeriodForm({ onSave }: { onSave: (p: PrizePeriod) => void 
       <Field label={t('manual.first')}>
         <input className="input font-mono" value={first} onChange={(e) => setFirst(e.target.value)} />
       </Field>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 gap-3 min-[400px]:grid-cols-2">
         <Field label={t('manual.claimStart')}>
           <input type="date" className="input" value={cs} onChange={(e) => setCs(e.target.value)} />
         </Field>

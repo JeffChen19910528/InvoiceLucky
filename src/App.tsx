@@ -49,8 +49,8 @@ export default function App() {
         key={n.id}
         onClick={() => setPage(n.id)}
         aria-current={active ? 'page' : undefined}
-        className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-600 ${
-          vertical ? 'w-full' : 'flex-1 flex-col gap-0.5 text-xs'
+        className={`flex items-center rounded-lg py-2 font-medium focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-600 ${
+          vertical ? 'w-full gap-2 px-3 text-sm' : 'min-w-0 flex-1 flex-col justify-start gap-0.5 px-1 text-center text-[11px] leading-tight min-[400px]:text-xs'
         } ${active ? 'bg-brand-50 text-brand-700' : 'text-slate-600 hover:bg-slate-100'}`}
       >
         <Icon size={vertical ? 18 : 20} aria-hidden />
@@ -73,11 +73,11 @@ export default function App() {
         <p className="mt-6 px-2 text-xs leading-relaxed text-slate-500">{t('app.disclaimer')}</p>
       </aside>
 
-      <div className="min-w-0 flex-1 pb-20 md:pb-0">
-        <header className="flex items-center justify-between border-b border-slate-200 bg-brand-900 px-4 py-3 text-white md:hidden">
-          <span className="font-bold">🧾 InvoiceLucky</span>
-          <span className="flex items-center gap-2">
-            <span className="text-xs text-cyan-100">{t('app.unofficialShort')}</span>
+      <div className="min-w-0 flex-1 pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-0">
+        <header className="flex items-center justify-between gap-2 border-b border-slate-200 bg-brand-900 px-4 py-3 text-white md:hidden">
+          <span className="shrink-0 font-bold">🧾 InvoiceLucky</span>
+          <span className="flex min-w-0 items-center gap-2">
+            <span className="text-xs leading-tight text-cyan-100">{t('app.unofficialShort')}</span>
             <LanguageSwitcher />
           </span>
         </header>
@@ -105,7 +105,7 @@ export default function App() {
         </main>
       </div>
 
-      <nav aria-label={t('nav.mobile')} className="fixed inset-x-0 bottom-0 z-40 flex border-t border-slate-200 bg-white p-1 md:hidden">
+      <nav aria-label={t('nav.mobile')} className="fixed inset-x-0 bottom-0 z-40 flex border-t border-slate-200 bg-white p-1 pb-[max(0.25rem,env(safe-area-inset-bottom))] md:hidden">
         {NAV.map((n) => navButton(n, false))}
       </nav>
     </div>

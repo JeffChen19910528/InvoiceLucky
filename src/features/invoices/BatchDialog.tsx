@@ -38,7 +38,7 @@ export function BatchDialog({ onClose }: { onClose: () => void }) {
           <code>2026-08-03,CD00012345,250,Dinner</code>
           {t('batch.helpD')}
         </p>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 gap-3 min-[400px]:grid-cols-2">
           <Field label={t('batch.defPeriod')}>
             <PeriodSelect value={period} onChange={setPeriod} periods={periods} />
           </Field>

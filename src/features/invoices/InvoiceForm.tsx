@@ -75,7 +75,7 @@ export function InvoiceForm({ editing, onClose }: { editing?: Invoice; onClose: 
             autoComplete="off"
           />
         </Field>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 gap-3 min-[400px]:grid-cols-2">
           <Field label={t('inv.date')} error={errors.date}>
             <input type="date" className="input" value={date} onChange={(e) => onDate(e.target.value)} />
           </Field>
