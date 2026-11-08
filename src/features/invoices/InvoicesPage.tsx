@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Pencil, Plus, Search, Trash2, ListPlus } from 'lucide-react'
+import { Pencil, Plus, Search, Trash2, ListPlus, ScanLine } from 'lucide-react'
 import { useAppStore } from '../../stores/appStore'
 import { useResults } from '../../stores/hooks'
 import { Empty } from '../../components/ui'
@@ -11,6 +11,7 @@ import { isDateInPeriod } from '../../domain/period/period'
 import { useFormat, useT } from '../../i18n'
 import { InvoiceForm } from './InvoiceForm'
 import { BatchDialog } from './BatchDialog'
+import { ScanDialog } from './ScanDialog'
 
 type SortKey = 'date-desc' | 'date-asc' | 'amount-desc' | 'prize-desc'
 
@@ -24,6 +25,7 @@ export default function InvoicesPage() {
   const [sort, setSort] = useState<SortKey>('date-desc')
   const [form, setForm] = useState<{ editing?: Invoice } | null>(null)
   const [batch, setBatch] = useState(false)
+  const [scan, setScan] = useState(false)
   const [toDelete, setToDelete] = useState<Invoice | null>(null)
 
   const list = useMemo(() => {
@@ -44,7 +46,10 @@ export default function InvoicesPage() {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h1 className="text-xl font-bold">{t('inv.title')}</h1>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
+          <button className="btn-ghost" onClick={() => setScan(true)}>
+            <ScanLine size={16} aria-hidden /> {t('scan.btn')}
+          </button>
           <button className="btn-ghost" onClick={() => setBatch(true)}>
             <ListPlus size={16} aria-hidden /> {t('inv.batchBtn')}
           </button>
@@ -108,6 +113,7 @@ export default function InvoicesPage() {
 
       {form && <InvoiceForm editing={form.editing} onClose={() => setForm(null)} />}
       {batch && <BatchDialog onClose={() => setBatch(false)} />}
+      {scan && <ScanDialog onClose={() => setScan(false)} />}
       {toDelete && (
         <ConfirmDialog
           title={t('inv.deleteTitle')}

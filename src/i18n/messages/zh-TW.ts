@@ -191,6 +191,28 @@ export const zhTW = {
   'batch.skipped': '略過重複 {n} 張：{list}。',
   'batch.addN': '新增 {n} 張',
 
+  // ── 掃描發票 ──
+  'scan.btn': '掃描發票',
+  'scan.title': '掃描發票條碼',
+  'scan.help': '將發票左側的 QR Code（或上方的條碼）對準鏡頭，會自動加入下方清單，確認後再一次新增。影像只在您的裝置上處理，不會上傳。',
+  'scan.videoAria': '相機預覽',
+  'scan.starting': '正在啟動相機…',
+  'scan.hintRight': '這是右側的 QR Code，請改掃發票左側的 QR Code 或上方的條碼。',
+  'scan.hintUnknown': '這不是電子發票的 QR Code 或條碼。',
+  'scan.hintDup': '這張已在清單中。',
+  'scan.listTitle': '已掃描（{n} 張）',
+  'scan.empty': '尚未掃描任何發票',
+  'scan.removeAria': '移除 {n}',
+  'scan.alreadyRecorded': '已登錄過',
+  'scan.barcodeMeta': '條碼僅含號碼，日期以當月 1 日代替、金額未知',
+  'scan.retry': '重試',
+  'scan.err.denied': '相機權限被拒絕。請在瀏覽器網址列旁的網站設定允許使用相機後重試，或改用手動／批次輸入。',
+  'scan.err.noCamera': '找不到可用的相機。',
+  'scan.err.busy': '相機正被其他程式使用，請關閉後重試。',
+  'scan.err.insecure': '瀏覽器只允許在 HTTPS 或 localhost 使用相機。',
+  'scan.err.unsupported': '此瀏覽器不支援相機存取。',
+  'scan.err.unknown': '無法啟動相機。',
+
   // ── 設定 ──
   'set.title': '設定與備份',
   'backup.title': '資料備份',

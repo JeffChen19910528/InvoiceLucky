@@ -193,6 +193,28 @@ export const en: Record<keyof typeof zhTW, string> = {
   'batch.skipped': 'Skipped {n} duplicate(s): {list}.',
   'batch.addN': 'Add {n}',
 
+  // ── Scan invoice ──
+  'scan.btn': 'Scan invoice',
+  'scan.title': 'Scan invoice code',
+  'scan.help': 'Point the camera at the QR code on the left of the receipt (or the barcode at the top). Codes are added to the list below automatically; confirm to add them all at once. Video is processed only on your device and is never uploaded.',
+  'scan.videoAria': 'Camera preview',
+  'scan.starting': 'Starting camera…',
+  'scan.hintRight': 'That is the right-hand QR code. Scan the left QR code or the barcode at the top instead.',
+  'scan.hintUnknown': 'That is not an e-invoice QR code or barcode.',
+  'scan.hintDup': 'Already in the list.',
+  'scan.listTitle': 'Scanned ({n})',
+  'scan.empty': 'Nothing scanned yet',
+  'scan.removeAria': 'Remove {n}',
+  'scan.alreadyRecorded': 'Already recorded',
+  'scan.barcodeMeta': 'barcode has the number only; date set to the 1st of the month, amount unknown',
+  'scan.retry': 'Retry',
+  'scan.err.denied': 'Camera permission was denied. Allow camera access in the browser site settings and retry, or use manual / batch input.',
+  'scan.err.noCamera': 'No usable camera was found.',
+  'scan.err.busy': 'The camera is in use by another app. Close it and retry.',
+  'scan.err.insecure': 'Browsers only allow camera access on HTTPS or localhost.',
+  'scan.err.unsupported': 'This browser does not support camera access.',
+  'scan.err.unknown': 'Could not start the camera.',
+
   // ── Settings ──
   'set.title': 'Settings & backup',
   'backup.title': 'Data backup',

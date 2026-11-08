@@ -9,6 +9,7 @@ A front-end-only, responsive web app for checking Taiwan's uniform invoice (rece
 ## Features
 
 - Add / edit / delete invoices (deletion needs confirmation), batch input (`AB12345678` or `date,number,amount,note`), filter / search / sort by period, duplicate protection within a period
+- Camera scanning: open the camera on a phone or computer and scan the QR code on the left of an e-invoice (number, date and amount are filled in automatically) or the Code 39 barcode at the top (number only); review the list, then add everything at once
 - Prize check: Special, Grand, First, and Second–Sixth prizes; quick single-number check and batch check of recorded invoices; only the single highest prize is counted per invoice
 - Overview: invoices this period, winning count, estimated winnings, claim-deadline reminders (claimable vs. expired are totalled separately)
 - Draw history: browse by year, with source status, claim window and fetch time
@@ -52,6 +53,23 @@ npm run dev        # development server
 npm run build      # produce dist/
 npm run preview    # preview the production build
 ```
+
+## Scanning invoices with the camera
+
+On the Invoices page, press "Scan invoice". Supported:
+
+- **Left QR code**: parses the invoice number, issue date (ROC → Gregorian), period and total amount.
+- **Top Code 39 barcode**: contains only year-month and the number, so the date is set to the 1st of that month (still inside the same period) and the amount is unknown.
+- The right-hand QR code (starting with `**`) and anything else are ignored with a hint.
+
+Notes:
+
+- Browsers only allow camera access on **HTTPS or localhost**, and the camera permission must be granted on first use; if it is denied, an explanation and a retry button are shown. Phones use the rear camera by default.
+- Video is processed only on your device and is never uploaded; closing the dialog releases the camera.
+- Scanned invoices are listed first and added only after you confirm; the same number in the same period is never overwritten and is reported as skipped.
+- The QR code on receipts is dense: hold the phone close, keep it in focus and well lit.
+- Decoding uses `@zxing/browser`, split into a separate chunk and loaded dynamically, so it is only downloaded when you press Scan.
+- Layering: `domain/invoice-scan` (pure parser), `services/scanner` (scanner interface and zxing implementation), `features/invoices/ScanDialog` (UI; a fake scanner can be injected for tests).
 
 ## Internationalization (i18n)
 
