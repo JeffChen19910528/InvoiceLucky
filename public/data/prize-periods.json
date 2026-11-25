@@ -1,7 +1,28 @@
 {
-  "generatedAt": "2026-11-08T12:38:59.184Z",
+  "generatedAt": "2026-11-25T11:22:59.208Z",
   "source": "https://invoice.etax.nat.gov.tw/",
   "periods": [
+    {
+      "id": "115-09-10",
+      "year": 115,
+      "months": [
+        9,
+        10
+      ],
+      "claimStart": "2026-12-06",
+      "claimEnd": "2027-03-05",
+      "specialPrize": "97606522",
+      "grandPrize": "76160702",
+      "firstPrizes": [
+        "02096005",
+        "28745017",
+        "76740352"
+      ],
+      "source": "official",
+      "sourceUrl": "https://invoice.etax.nat.gov.tw/index.html",
+      "fetchedAt": "2026-11-25T11:22:58.507Z",
+      "verifiedAt": "2026-11-25T11:22:58.507Z"
+    },
     {
       "id": "115-07-08",
       "year": 115,
